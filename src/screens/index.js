@@ -5,7 +5,8 @@ import Contact from './home/Contact';
 import Chat from './home/Chat';
 import PersonalChat from './home/PersonalChat';
 import More from './home/More';
-
+import Profile from './home/Profile';
+import AddContact from './home/AddContact';
 
 export {
     Welcome,
@@ -15,4 +16,6 @@ export {
     Chat,
     PersonalChat,
     More,
+    Profile,
+    AddContact
 }

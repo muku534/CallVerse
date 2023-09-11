@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,71 +11,88 @@ import {
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, images } from '../../../constants';
 import PageContainer from '../../components/PageContainer';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from "axios"
+import { getUserData } from '../auth/Storage'
 
 const Contact = ({ navigation }) => {
-
-    const Contacts = [
-        {
-            id: '1',
-            userName: 'Mr.Mukesh',
-            UserImg: images.user4,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
-        {
-            id: '2',
-            userName: 'Doraemon',
-            UserImg: images.user5,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
-        {
-            id: '3',
-            userName: 'Prerna',
-            UserImg: images.user1,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
-        {
-            id: '4',
-            userName: 'Mr.Jaspal',
-            UserImg: images.user6,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
-    ];
-
+    const [userData, setUserData] = useState(null);
+    const [contacts, setContacts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [filteredUsers, setFilteredUsers] = useState(Contacts);
+    const [filteredContacts, setFilteredContacts] = useState([]);
 
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const user = await getUserData();
+                if (user) {
+                    setUserData(user);
+                    console.log("This is the userData:", user.randomNumber);
+                    // Fetch contacts only when user data is available
+                    setContacts(user.randomNumber);
+                } else {
+                    // Handle the case where user data is not found
+                    console.error("User data not found");
+                }
+            } catch (error) {
+                // Handle any errors that occur during data fetching
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        fetchUserData();
+    }, []);
+
+
+
+    useEffect(() => {
+        // Fetch contacts from your API here
+        const fetchContacts = async () => {
+            if (!userData) {
+                setLoading(false);
+                return; // Wait for userData to be available
+            }
+            try {
+                const response = await axios.get(`http://192.168.42.81:5000/contacts`, {
+                    params: {
+                        userRandomNumber: userData.randomNumber
+                    }
+                });
+
+                if (response.data.success) {
+                    setContacts(response.data.contacts);
+                    console.log(response.data.contacts)
+                    setFilteredContacts(response.data.contacts);
+                } else {
+                    // Handle the case when the server returns an error
+                    console.error('Error fetching contact:', response.data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching contacts:', error);
+                setLoading(false);
+            } finally {
+                setLoading(false); // Set loading to false whether success or error
+            }
+        };
+
+        fetchContacts();
+    }, [userData]);
+
+    // Function to handle search input change
     const handleSearch = (text) => {
         setSearch(text);
-        const filteredData = Contacts.filter((user) =>
-            user.userName.toLowerCase().includes(text.toLowerCase())
+        // Filter the contacts based on the search input
+        const filteredData = contacts.filter((contact) =>
+            contact.userName.toLowerCase().includes(text.toLowerCase())
         );
-        setFilteredUsers(filteredData);
+        setFilteredContacts(filteredData);
     };
+
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
-            onPress={() =>
-                navigation.navigate('PersonalChat', {
-                    userName: item.userName,
-                })
-            }
+            onPress={() => navigation.navigate('PersonalChat', { userName: item.contactName, userImg: images.user4, recipientId: item.ContactUserId, })}
             style={{
                 width: '100%',
                 flexDirection: 'row',
@@ -87,25 +104,10 @@ const Contact = ({ navigation }) => {
                 marginRight: 22,
             }}
         >
-            {item.isOnline && (
-                <View
-                    style={{
-                        height: 14,
-                        width: 14,
-                        borderRadius: 7,
-                        backgroundColor: COLORS.green,
-                        borderColor: COLORS.white,
-                        borderWidth: 2,
-                        position: 'absolute',
-                        top: 14,
-                        right: 2,
-                        zIndex: 1000,
-                    }}
-                />
-            )}
-
+            {/* Render online status indicator if needed */}
+            {/* Use item.randomNumber to uniquely identify contacts if needed */}
             <Image
-                source={item.UserImg}
+                source={images.user4} // Assuming you have a UserImg property in your contact data
                 resizeMode="contain"
                 style={{
                     height: 45,
@@ -114,16 +116,15 @@ const Contact = ({ navigation }) => {
                 }}
             />
             <View style={{ flexDirection: 'column', marginHorizontal: 15 }}>
-                <Text style={{ ...FONTS.h4, marginBottom: 4 }}>{item.userName}</Text>
-                <Text style={{ fontSize: 14, color: '#808080' }}>
-                    {item.lastSeen}
-                </Text>
+                <Text style={{ ...FONTS.h4, marginBottom: 4 }}>{item.contactName}</Text>
+                {/* Use item.randomNumber or other properties for additional contact information */}
             </View>
         </TouchableOpacity>
     );
 
+
     return (
-        <SafeAreaView style={{flex:1}}>
+        <SafeAreaView style={{ flex: 1 }}>
             <PageContainer>
                 <View style={{ flex: 1 }}>
                     <View
@@ -136,7 +137,7 @@ const Contact = ({ navigation }) => {
                         }}
                     >
                         <Text style={{ ...FONTS.h4 }}>Contacts</Text>
-                        <TouchableOpacity onPress={() => console.log('Add Contacts')}>
+                        <TouchableOpacity onPress={() => navigation.navigate("AddContact")}>
                             <AntDesign name="plus" size={20} color={COLORS.secondaryBlack} />
                         </TouchableOpacity>
                     </View>
@@ -165,13 +166,22 @@ const Contact = ({ navigation }) => {
                             onChangeText={handleSearch}
                         />
                     </View>
-                    <View style={{ paddingBottom: 100 }}>
+
+                    {loading ? (
+                        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50 }}>
+                            <Text style={{ ...FONTS.h4, color: COLORS.secondaryGray }}>
+                                Please add the Contacts
+                            </Text>
+                        </View>
+                    ) : (
                         <FlatList
-                            data={filteredUsers}
+                            data={filteredContacts}
                             renderItem={renderItem}
-                            keyExtractor={(item) => item.id.toString()}
+                            keyExtractor={(item) => item.randomNumber.toString()} // Use a valid identifier
                         />
-                    </View>
+                    )}
+
+
                 </View>
             </PageContainer>
         </SafeAreaView>

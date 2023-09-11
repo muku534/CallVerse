@@ -10,6 +10,7 @@ import Welcome from './src/screens/home/Welcome'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AddProfile from './src/screens/home/AddProfile';
 import BottomTabNavigation from './src/navigation/BottomTabNavigator';
+import { AddContact, Contact, PersonalChat, Profile } from './src/screens';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -66,6 +67,34 @@ export default function App() {
           <Stack.Screen
             name="AddProfile"
             component={AddProfile}
+            options={{
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={Profile}
+            options={{
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name="PersonalChat"
+            component={PersonalChat}
+            options={{
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name="Contact"
+            component={Contact}
+            options={{
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name="AddContact"
+            component={AddContact}
             options={{
               headerShown: false
             }}

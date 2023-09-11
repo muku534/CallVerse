@@ -30,24 +30,14 @@ const Chat = ({ navigation }) => {
         },
         {
             id: '3',
-            userName: 'Prerna',
+            userName: 'Ankita',
             userImg: images.user1,
             isOnline: false,
             lastSeen: '1 Min ago',
             lastMessage: 'How is it going...',
             messageInQueue: 3,
             sentData: '1277',
-        },
-        {
-            id: '4',
-            userName: 'Mr.Jaspal',
-            userImg: images.user6,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
+        }
     ];
 
     const [search, setSearch] = useState('');
@@ -114,7 +104,7 @@ const Chat = ({ navigation }) => {
         </TouchableOpacity>
     );
     return (
-        <SafeAreaView style={{flex:1}}>
+        <SafeAreaView style={{ flex: 1 }}>
             <PageContainer>
                 <View style={{ flex: 1 }}>
                     <View
@@ -123,7 +113,7 @@ const Chat = ({ navigation }) => {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             marginHorizontal: 22,
-                            marginTop: 35,
+                            marginTop: 15,
                         }}
                     >
                         <Text style={{ ...FONTS.h4 }}>Chats</Text>
@@ -147,30 +137,6 @@ const Chat = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    {/* <View style={{ marginHorizontal: 22, flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 4 }}>
-                            <TouchableOpacity
-                                style={{
-                                    height: 50,
-                                    width: 50,
-                                    borderRadius: 25,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: '#e6edff',
-                                    marginBottom: 4,
-                                }}
-                            >
-                                <AntDesign name="plus" size={24} color={COLORS.black} />
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            horizontal={true}
-                            showsHorizontalScrollIndicator={false}
-                            data={contacts}
-                            keyExtractor={(item) => item.id}
-                            renderItem={renderItem}
-                        />
-                    </View> */}
                     <View
                         style={{
                             marginHorizontal: 22,
