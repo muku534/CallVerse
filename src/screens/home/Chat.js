@@ -1,52 +1,75 @@
-import { View, Text, TouchableOpacity, FlatList, Image, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Image, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PageContainer from '../../components/PageContainer';
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SIZES, images } from '../../../constants';
-
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserData } from '../auth/Storage';
 
 const Chat = ({ navigation }) => {
-    const contacts = [
-        {
-            id: '1',
-            userName: 'Mr.Mukesh',
-            userImg: images.user4,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
-        {
-            id: '2',
-            userName: 'Doraemon',
-            userImg: images.user5,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        },
-        {
-            id: '3',
-            userName: 'Ankita',
-            userImg: images.user1,
-            isOnline: false,
-            lastSeen: '1 Min ago',
-            lastMessage: 'How is it going...',
-            messageInQueue: 3,
-            sentData: '1277',
-        }
-    ];
-
+    const [userData, setUserData] = useState(null);
+    const [allChatUsers, setAllChatUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [filteredUsers, setFilteredUsers] = useState(contacts);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const user = await getUserData();
+                if (user) {
+                    setUserData(user);
+                    setAllChatUsers(user._id)
+                } else {
+                    console.error("User data not found");
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        fetchUserData();
+    }, []);
+
+    useEffect(() => {
+        const fetchChatUsers = async () => {
+            if (!userData) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get(`http://192.168.42.54:5000/AllChatRooms`, {
+                    params: {
+                        userId: userData._id
+                    }
+                });
+
+                if (response.status === 200) {
+                    setAllChatUsers(response.data.users);
+                    console.log(response.data.users)
+                    setFilteredUsers(response.data.users);
+                } else {
+                    console.error('Error fetching contact:', response.data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching contacts:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (userData) {
+            fetchChatUsers();
+        }
+    }, [userData]);
 
     const handleSearch = (text) => {
         setSearch(text);
-        const filteredData = contacts.filter((user) =>
-            user.userName.toLowerCase().includes(text.toLowerCase())
+        const filteredData = allChatUsers.filter((users) =>
+            users.userName.toLowerCase().includes(text.toLowerCase())
         );
         setFilteredUsers(filteredData);
     };
@@ -55,7 +78,7 @@ const Chat = ({ navigation }) => {
         <TouchableOpacity
             onPress={() =>
                 navigation.navigate('PersonalChat', {
-                    userName: item.userName, userImg: item.userImg,
+                    userName: item.name, userImg: images.user4, recipientId: item._id,
                 })
             }
             style={{
@@ -65,44 +88,27 @@ const Chat = ({ navigation }) => {
                 paddingHorizontal: 22,
                 borderBottomColor: COLORS.secondaryWhite,
                 borderBottomWidth: 1,
-                paddingVertical: 15,
-                marginRight: 22,
+                paddingVertical: 10,
             }}
         >
-            {item.isOnline && (
-                <View
-                    style={{
-                        height: 14,
-                        width: 14,
-                        borderRadius: 7,
-                        backgroundColor: COLORS.green,
-                        borderColor: COLORS.white,
-                        borderWidth: 2,
-                        position: 'absolute',
-                        top: 14,
-                        right: 2,
-                        zIndex: 1000,
-                    }}
-                />
-            )}
-
             <Image
-                source={item.userImg}
+                source={images.user4}
                 resizeMode="contain"
                 style={{
-                    height: 45,
-                    width: 45,
+                    height: 42,
+                    width: 42,
                     borderRadius: 25,
                 }}
             />
             <View style={{ flexDirection: 'column', marginHorizontal: 15 }}>
-                <Text style={{ ...FONTS.h4, marginBottom: 4 }}>{item.userName}</Text>
+                <Text style={{ ...FONTS.h4, marginBottom: 4 }}>{item.name}</Text>
                 <Text style={{ fontSize: 14, color: '#808080' }}>
-                    {item.lastSeen}
+                    {item.bio}
                 </Text>
             </View>
         </TouchableOpacity>
     );
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <PageContainer>
@@ -150,7 +156,6 @@ const Chat = ({ navigation }) => {
                         }}
                     >
                         <Ionicons name="ios-search-outline" size={24} color={COLORS.black} />
-
                         <TextInput
                             style={{
                                 width: '100%',
@@ -162,13 +167,15 @@ const Chat = ({ navigation }) => {
                             onChangeText={handleSearch}
                         />
                     </View>
-                    <View style={{ paddingBottom: 100 }}>
+                    {loading ? (
+                        <ActivityIndicator size="large" color={COLORS.primary} />
+                    ) : (
                         <FlatList
-                            data={filteredUsers}
+                            data={allChatUsers}
                             renderItem={renderItem}
-                            keyExtractor={(item) => item.id.toString()}
+                            keyExtractor={(item) => item._id} // Assuming _id is a unique identifier
                         />
-                    </View>
+                    )}
                 </View>
             </PageContainer>
         </SafeAreaView>

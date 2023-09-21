@@ -7,6 +7,7 @@ import PersonalChat from './home/PersonalChat';
 import More from './home/More';
 import Profile from './home/Profile';
 import AddContact from './home/AddContact';
+import VoiceCall from './home/VoiceCall';
 
 export {
     Welcome,
@@ -17,5 +18,6 @@ export {
     PersonalChat,
     More,
     Profile,
-    AddContact
+    AddContact,
+    VoiceCall
 }

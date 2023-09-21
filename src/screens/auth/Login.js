@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONTS, SIZES } from '../../../constants';
 import Button from '../../components/Button';
@@ -14,7 +14,7 @@ const Login = ({ navigation }) => {
     const sendOtpEmail = async () => {
         try {
             // Send a request to the API to initiate the OTP email
-            const response = await axios.post(`http://192.168.42.81:5000/signin`, {
+            const response = await axios.post(`http://192.168.42.54:5000/signin`, {
                 randomNumber: phoneNumber,
             });
 
@@ -36,13 +36,13 @@ const Login = ({ navigation }) => {
     const verifyOtp = async () => {
         try {
             // Send a request to the API to verify the OTP
-            const response = await axios.post(`http://192.168.42.81:5000/verifyOTP`, {
+            const response = await axios.post(`http://192.168.42.54:5000/verifyOTP`, {
                 randomNumber: phoneNumber,
                 otp: parseInt(otp),
             });
 
 
-            console.log('Response from OTP verification API:', response.data);
+            // console.log('Response from OTP verification API:', response.data);
 
 
             if (response.data.success) {
@@ -54,7 +54,7 @@ const Login = ({ navigation }) => {
                     await AsyncStorage.setItem('authToken', token);
 
                     // Check if userData is defined before saving it
-                    console.log('userData to be stored:', userData, token);
+                    // console.log('userData to be stored:', userData, token);
                     if (userData) {
                         await AsyncStorage.setItem('userData', JSON.stringify(userData, token));
                         navigation.navigate('BottomTabNavigation', { randomNumber: phoneNumber });
@@ -81,20 +81,21 @@ const Login = ({ navigation }) => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+        <SafeAreaView style={styles.container}>
             <ScrollView>
                 <View>
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'column', marginHorizontal: 22, height: '30%' }}>
-                        <Image source={require('../../../assets/images/9233852_4112338.jpg')} style={{ width: SIZES.width * 0.8, height: SIZES.width * 0.8, marginVertical: 10 }} />
+                    <View style={styles.imageContainer}>
+                        <Image source={require('../../../assets/images/9233852_4112338.jpg')}
+                            style={styles.image} />
                     </View>
-                    <View style={{ flex: 1, marginHorizontal: 22 }}>
-                        <View style={{ marginVertical: 22 }}>
-                            <Text style={{ fontSize: 22, fontWeight: 'bold', marginVertical: 12, color: COLORS.black }}>Hi Welcome Back! 👋</Text>
-                            <Text style={{ fontSize: 16, color: COLORS.black }}>Hello again, you have been missed!</Text>
+                    <View style={styles.contentContainer}>
+                        <View style={styles.welcomeContainer}>
+                            <Text style={styles.welcomeText}>Hi Welcome Back! 👋</Text>
+                            <Text style={styles.welcomeText2}>Hello again, you have been missed!</Text>
                         </View>
-                        <View style={{ marginBottom: 12 }}>
-                            <Text style={{ fontSize: 16, fontWeight: '400', marginVertical: 8 }}>Phone Number</Text>
-                            <View style={{ width: '100%', height: 48, borderColor: COLORS.black, borderWidth: 1, borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingLeft: 22 }}>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.lable}>Phone Number</Text>
+                            <View style={styles.TextInput}>
                                 <TextInput
                                     maxLength={10}
                                     placeholder='Enter your Phone Number'
@@ -107,9 +108,9 @@ const Login = ({ navigation }) => {
                             </View>
                         </View>
                         {showOtpInput && (
-                            <View style={{ marginBottom: 12 }}>
-                                <Text style={{ fontSize: 16, fontWeight: '400', marginVertical: 8 }}>OTP</Text>
-                                <View style={{ width: '100%', height: 48, borderColor: COLORS.black, borderWidth: 1, borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingLeft: 22 }}>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.lable}>OTP</Text>
+                                <View style={styles.TextInput}>
                                     <TextInput
                                         maxLength={6}
                                         placeholder='Enter OTP'
@@ -127,28 +128,106 @@ const Login = ({ navigation }) => {
                                 title='Send OTP'
                                 filled
                                 onPress={sendOtpEmail}
-                                style={{ marginTop: 15, marginBottom: 4 }}
+                                style={styles.Button}
                             />
                         ) : (
                             <Button
                                 title='Verify OTP'
                                 filled
                                 onPress={verifyOtp}
-                                style={{ marginTop: 15, marginBottom: 4 }}
+                                style={styles.Button}
                             />
                         )}
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 15 }}>
-                            <Text style={{ fontSize: 16, color: COLORS.black }}>Don't have an account? </Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('Welcome')} style={{ justifyContent: 'center', alignItems: 'flex-end' }}>
-                                <Text style={{ ...FONTS.body4, color: COLORS.green }}>Generate New Number</Text>
+                        <View style={styles.linkContainer}>
+                            <Text style={styles.linkText}>Don't have an account? </Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('Welcome')} style={styles.linkbutton}>
+                                <Text style={styles.link}>Generate New Number</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </ScrollView>
-
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.white
+    },
+    imageContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        flexDirection: 'column',
+        marginHorizontal: 22,
+        height: '30%'
+    },
+    image: {
+        width: SIZES.width * 0.8,
+        height: SIZES.width * 0.8,
+        marginVertical: 10
+    },
+    contentContainer: {
+        flex: 1,
+        marginHorizontal: 22
+    },
+    welcomeContainer: {
+        marginVertical: 22
+    },
+    welcomeText: {
+        fontSize: 22,
+        // fontWeight: 'bold',
+        marginVertical: 12,
+        color: COLORS.black
+    },
+    welcomeText2: {
+        fontSize: 16,
+        color: COLORS.black
+    },
+    inputContainer: {
+        marginBottom: 12
+    },
+    lable: {
+        fontSize: 16,
+        fontWeight: '400',
+        marginVertical: 8
+    },
+    TextInput: {
+        width: '100%',
+        height: 48,
+        borderColor: COLORS.black,
+        borderWidth: 1,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingLeft: 22
+    },
+    Button: {
+        marginTop: 15,
+        marginBottom: 4
+    },
+    linkContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginVertical: 15
+    },
+    linkText: {
+        fontSize: 16,
+        color: COLORS.black
+    },
+    linkbutton: {
+        justifyContent: 'center',
+        alignItems: 'flex-end'
+    },
+    link: {
+        ...FONTS.body4,
+        color: COLORS.green
+    }
+
+
+})
 
 export default Login;

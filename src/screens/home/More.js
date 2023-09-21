@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, Modal } from 'react-native'
+import { View, Text, TouchableOpacity, Image, Modal, StyleSheet } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native'
 import PageContainer from '../../components/PageContainer'
@@ -40,72 +40,37 @@ const More = ({ navigation }) => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <PageContainer>
-                <View style={{ flex: 1 }}>
-                    <View style={{
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginHorizontal: 22,
-                        marginVertical: 22,
-                        marginTop: 35,
-                    }}>
+                <View style={styles.container}>
+                    <View style={styles.header}>
                         <Text style={{ ...FONTS.h4 }}>Settings</Text>
                     </View>
 
-                    <View style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginHorizontal: 22
-                    }}>
+                    <View style={styles.userInformation}>
 
-                        <View style={{
-                            height: 40,
-                            width: 40,
-                            borderRadius: 34,
-                            backgroundColor: COLORS.secondaryWhite,
-                            alignItems: "center",
-                            justifyContent: "center"
-                        }}>
-                            <Image source={images.user4} style={{
-                                width: 60,
-                                height: 60,
-                                borderRadius: 100,
-                                marginVertical: 48
-                            }} />
+                        <View style={styles.imageContainer}>
+                            <Image source={images.user4} style={styles.userImage} />
                         </View>
-                        <View style={{
-                            flexDirection: "column",
-                            marginHorizontal: 22
-                        }}>
-                            <Text style={{ ...FONTS.h4, marginVertical: 6 }}>
+                        <View style={styles.userNameContainer}>
+                            <Text style={styles.nameText}>
                                 {userData?.name}
                             </Text>
-                            <Text style={{ ...FONTS.body3, color: COLORS.gray }}> {userData?.randomNumber} </Text>
+                            <Text style={styles.randomNumber}> {userData?.randomNumber} </Text>
                         </View>
 
-                        <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={{ flexDirection: "column", alignItems: "flex-end", justifyContent: "flex-end", marginLeft: 55 }}>
+                        <TouchableOpacity onPress={() => navigation.navigate("AddProfile")} style={styles.rightArrow}>
                             <MaterialIcons name='keyboard-arrow-right' size={24}
                                 color={COLORS.black} />
                         </TouchableOpacity>
                     </View>
-                    <View style={{ marginTop: 32 }}>
-                        <TouchableOpacity onPress={() => navigation.navigate("Profile")}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                    <View style={styles.menuContainer}>
+                        <TouchableOpacity onPress={() => navigation.navigate("AddProfile")}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <AntDesign name='user'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Account
                                 </Text>
                             </View>
@@ -115,25 +80,15 @@ const More = ({ navigation }) => {
                                 color={COLORS.black} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => {
-                            console.log("presser")
-                        }}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                        <TouchableOpacity onPress={() => navigation.navigate('Chat')}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <Ionicons
                                     name='chatbubble-ellipses-outline'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Chat
                                 </Text>
                             </View>
@@ -144,21 +99,13 @@ const More = ({ navigation }) => {
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={toggleMenu}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <Entypo name='light-down'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Appearance
                                 </Text>
                             </View>
@@ -170,7 +117,7 @@ const More = ({ navigation }) => {
 
                         <Modal visible={showMenu} transparent animationType="fade">
                             <TouchableOpacity
-                                style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                                style={styles.model}
                                 onPress={toggleMenu}
                             >
                                 <View style={{
@@ -190,21 +137,13 @@ const More = ({ navigation }) => {
                         <TouchableOpacity onPress={() => {
                             console.log("presser")
                         }}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <Ionicons name='notifications-outline'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Notifications
                                 </Text>
                             </View>
@@ -217,21 +156,13 @@ const More = ({ navigation }) => {
                         <TouchableOpacity onPress={() => {
                             console.log("presser")
                         }}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <MaterialCommunityIcons name='shield-lock-open-outline'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Privacy
                                 </Text>
                             </View>
@@ -244,21 +175,13 @@ const More = ({ navigation }) => {
                         <TouchableOpacity onPress={() => {
                             console.log("presser")
                         }}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <AntDesign name='folder1'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Data usage
                                 </Text>
                             </View>
@@ -271,21 +194,13 @@ const More = ({ navigation }) => {
                         <TouchableOpacity onPress={() => {
                             console.log("presser")
                         }}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <Ionicons name='help-circle-outline'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Help
                                 </Text>
                             </View>
@@ -298,21 +213,13 @@ const More = ({ navigation }) => {
                         <TouchableOpacity onPress={() => {
                             console.log("presser")
                         }}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginHorizontal: 22,
-                                paddingVertical: 12
-                            }}
+                            style={styles.TouchableOpacity}
                         >
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center"
-                            }}>
+                            <View style={styles.menuItems}>
                                 <MaterialCommunityIcons name='email-outline'
                                     size={24}
                                     color={COLORS.black} />
-                                <Text style={{ ...FONTS.h4, marginLeft: 12 }}>
+                                <Text style={styles.menuText}>
                                     Invite Your Friends
                                 </Text>
                             </View>
@@ -323,13 +230,7 @@ const More = ({ navigation }) => {
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={() => navigation.navigate('Welcome')}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                marginHorizontal: 22,
-                                paddingVertical: 12,
-                                alignItems: "center"
-                            }}
+                            style={styles.logOutContainer}
                         >
                             <View style={{
                                 flexDirection: "row",
@@ -351,5 +252,87 @@ const More = ({ navigation }) => {
         </SafeAreaView >
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    },
+    header: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginHorizontal: 22,
+        marginVertical: 22,
+        marginTop: 15,
+    },
+    userInformation: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginHorizontal: 22
+    },
+    imageContainer: {
+        height: 40,
+        width: 40,
+        borderRadius: 34,
+        backgroundColor: COLORS.secondaryWhite,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    userImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 100,
+        marginVertical: 48
+    },
+    userNameContainer: {
+        flexDirection: "column",
+        marginHorizontal: 22
+    },
+    nameText: {
+        ...FONTS.h4,
+        marginVertical: 6
+    },
+    randomNumber: {
+        ...FONTS.body3,
+        color: COLORS.gray
+    },
+    rightArrow: {
+        flexDirection: "column",
+        alignItems: "flex-end",
+        justifyContent: "flex-end",
+        marginLeft: 55
+    },
+    menuContainer: {
+        marginTop: 32
+    },
+    TouchableOpacity: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: 22,
+        paddingVertical: 12
+    },
+    menuItems: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    menuText: {
+        ...FONTS.h4,
+        marginLeft: 12
+    },
+    model: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    },
+    logOutContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        marginHorizontal: 22,
+        paddingVertical: 12,
+        alignItems: "center"
+    }
+})
 
 export default More

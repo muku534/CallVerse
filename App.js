@@ -5,12 +5,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useFonts } from 'expo-font';
 import { useCallback } from 'react';
 import Login from './src/screens/auth/Login';
-import Register from './src/screens/auth/Register';
 import Welcome from './src/screens/home/Welcome'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AddProfile from './src/screens/home/AddProfile';
 import BottomTabNavigation from './src/navigation/BottomTabNavigator';
-import { AddContact, Contact, PersonalChat, Profile } from './src/screens';
+import { AddContact, Contact, PersonalChat, Profile, VoiceCall } from './src/screens';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -95,6 +94,13 @@ export default function App() {
           <Stack.Screen
             name="AddContact"
             component={AddContact}
+            options={{
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name="VoiceCall"
+            component={VoiceCall}
             options={{
               headerShown: false
             }}

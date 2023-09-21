@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Image, Alert, SafeAreaView } from 'react-native'
+import { View, Text, Pressable, Image, Alert, SafeAreaView, StyleSheet } from 'react-native'
 import React, { useEffect, useState } from 'react';
 import { FlatList, ScrollView, TextInput, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { LinearGradient } from "expo-linear-gradient";
@@ -95,139 +95,56 @@ const Welcome = ({ navigation }) => {
             }}
             colors={[COLORS.secondary, COLORS.primary]}
         >
-            <SafeAreaView style={{ flex: 1, color: COLORS.secondaryWhite }}>
-                <View style={{ flex: 1 }}>
+            <SafeAreaView >
+                <View style={styles.container}>
                     <View>
                         <Image
                             source={require("../../../assets/images/hero1.jpg")}
-                            style={{
-                                height: 100,
-                                width: 100,
-                                borderRadius: 20,
-                                position: "absolute",
-                                top: 10,
-                                transform: [
-                                    { translateX: 20 },
-                                    { translateY: 50 },
-                                    { rotate: "-15deg" }
-                                ]
-                            }}
+                            style={styles.image1}
                         />
 
                         <Image
                             source={require("../../../assets/images/hero3.jpg")}
-                            style={{
-                                height: 100,
-                                width: 100,
-                                borderRadius: 20,
-                                position: "absolute",
-                                top: -30,
-                                left: 100,
-                                transform: [
-                                    { translateX: 50 },
-                                    { translateY: 50 },
-                                    { rotate: "-5deg" }
-                                ]
-                            }}
+                            style={styles.images2}
                         />
 
                         <Image
                             source={require("../../../assets/images/hero3.jpg")}
-                            style={{
-                                width: 100,
-                                height: 100,
-                                borderRadius: 20,
-                                position: "absolute",
-                                top: 130,
-                                left: -50,
-                                transform: [
-                                    { translateX: 50 },
-                                    { translateY: 50 },
-                                    { rotate: "15deg" }
-                                ]
-                            }}
+                            style={styles.images3}
                         />
 
                         <Image
                             source={require("../../../assets/images/hero2.jpg")}
-                            style={{
-                                height: 200,
-                                width: 200,
-                                borderRadius: 20,
-                                position: "absolute",
-                                top: 110,
-                                left: 100,
-                                transform: [
-                                    { translateX: 50 },
-                                    { translateY: 50 },
-                                    { rotate: "-15deg" }
-                                ]
-                            }}
+                            style={styles.image4}
                         />
                     </View>
 
                     {/* content  */}
 
-                    <View style={{
-                        paddingHorizontal: 22,
-                        position: "absolute",
-                        top: 400,
-                        width: "100%"
-                    }}>
-                        <Text style={{
-                            fontSize: 50,
-                            fontWeight: 800,
-                            color: COLORS.white
-                        }}>Let's Get</Text>
-                        <Text style={{
-                            fontSize: 46,
-                            fontWeight: 800,
-                            color: COLORS.white
-                        }}>Started</Text>
+                    <View style={styles.contentContainer}>
+                        <Text style={styles.text}>Let's Get</Text>
+                        <Text style={styles.text2}>Started</Text>
 
-                        <View style={{ marginVertical: 12 }}>
-                            <Text style={{
-                                fontSize: 16,
-                                color: COLORS.white,
-                                marginVertical: 4
-                            }}>Connect with each other with chatting</Text>
-                            <Text style={{
-                                fontSize: 16,
-                                color: COLORS.white,
-                            }}>Calling, Enjoy Safe and private texting</Text>
+                        <View style={styles.sloganContainer}>
+                            <Text style={styles.sloganText}>Connect with each other with chatting</Text>
+                            <Text style={styles.sloganText}>Calling, Enjoy Safe and private texting</Text>
                         </View>
 
                         <Button
                             title="Join Now"
                             onPress={handleGenerateNumber}
-                            style={{
-                                marginTop: 5,
-                                width: "100%"
-                            }}
+                            style={styles.Button}
                         />
 
                         {/* <Button onPress={handleDeleteNumber} title="Delete Number" /> */}
 
-                        <View style={{
-                            flexDirection: "row",
-                            marginTop: 5,
-                            justifyContent: "center"
-                        }}>
-                            <Text style={{
-                                fontSize: 16,
-                                color: COLORS.white
-                            }}>Already have an account ?</Text>
+                        <View style={styles.linkContainer}>
+                            <Text style={styles.lnikText}>Already have an account ?</Text>
                             <Pressable
                                 onPress={() => navigation.navigate("Login")}
                             >
-                                <Text style={{
-                                    fontSize: 16,
-                                    color: COLORS.white,
-                                    fontWeight: "bold",
-                                    marginLeft: 4
-                                }}>Login</Text>
+                                <Text style={styles.link}>Login</Text>
                             </Pressable>
-
                         </View>
                     </View>
                 </View>
@@ -236,5 +153,108 @@ const Welcome = ({ navigation }) => {
     )
 }
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        color: COLORS.secondaryWhite
+    },
+    image1: {
+        height: 100,
+        width: 100,
+        borderRadius: 20,
+        position: "absolute",
+        top: 10,
+        transform: [
+            { translateX: 20 },
+            { translateY: 50 },
+            { rotate: "-15deg" }
+        ]
+    },
+    images2: {
+        height: 100,
+        width: 100,
+        borderRadius: 20,
+        position: "absolute",
+        top: -30,
+        left: 100,
+        transform: [
+            { translateX: 50 },
+            { translateY: 50 },
+            { rotate: "-5deg" }
+        ]
+    },
+    images3: {
+        width: 100,
+        height: 100,
+        borderRadius: 20,
+        position: "absolute",
+        top: 130,
+        left: -50,
+        transform: [
+            { translateX: 50 },
+            { translateY: 50 },
+            { rotate: "15deg" }
+        ]
+    },
+    image4: {
+        height: 200,
+        width: 200,
+        borderRadius: 20,
+        position: "absolute",
+        top: 110,
+        left: 100,
+        transform: [
+            { translateX: 50 },
+            { translateY: 50 },
+            { rotate: "-15deg" }
+        ]
+    },
+
+    contentContainer: {
+        paddingHorizontal: 22,
+        position: "absolute",
+        top: 400,
+        width: "100%"
+    },
+    text: {
+        fontSize: 50,
+        fontWeight: '800',
+        color: COLORS.white
+    },
+    text2: {
+        fontSize: 46,
+        fontWeight:'800',
+        // fontWeight: 800,
+        color: COLORS.white
+    },
+    sloganContainer: {
+        marginVertical: 12
+    },
+    sloganText: {
+        fontSize: 16,
+        color: COLORS.white,
+        marginVertical: 4
+    },
+    Button: {
+        marginTop: 5,
+        width: "100%"
+    },
+    linkContainer: {
+        flexDirection: "row",
+        marginTop: 5,
+        justifyContent: "center"
+    },
+    lnikText: {
+        fontSize: 16,
+        color: COLORS.white
+    },
+    link: {
+        fontSize: 16,
+        color: COLORS.white,
+        fontWeight:'bold',
+        // fontWeight: "bold",
+        marginLeft: 4
+    }
+})
 
 export default Welcome

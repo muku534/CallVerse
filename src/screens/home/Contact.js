@@ -6,6 +6,7 @@ import {
     SafeAreaView,
     TextInput,
     FlatList,
+    StyleSheet,
     Image,
 } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
@@ -54,7 +55,7 @@ const Contact = ({ navigation }) => {
                 return; // Wait for userData to be available
             }
             try {
-                const response = await axios.get(`http://192.168.42.81:5000/contacts`, {
+                const response = await axios.get(`http://192.168.42.54:5000/contacts`, {
                     params: {
                         userRandomNumber: userData.randomNumber
                     }
@@ -100,8 +101,7 @@ const Contact = ({ navigation }) => {
                 paddingHorizontal: 22,
                 borderBottomColor: COLORS.secondaryWhite,
                 borderBottomWidth: 1,
-                paddingVertical: 15,
-                marginRight: 22,
+                paddingVertical: 10,
             }}
         >
             {/* Render online status indicator if needed */}
@@ -110,13 +110,13 @@ const Contact = ({ navigation }) => {
                 source={images.user4} // Assuming you have a UserImg property in your contact data
                 resizeMode="contain"
                 style={{
-                    height: 45,
-                    width: 45,
+                    height: 42,
+                    width: 42,
                     borderRadius: 25,
                 }}
             />
             <View style={{ flexDirection: 'column', marginHorizontal: 15 }}>
-                <Text style={{ ...FONTS.h4, marginBottom: 4 }}>{item.contactName}</Text>
+                <Text style={{ ...FONTS.h4, marginBottom: 4 }}>{item.contactName} </Text>
                 {/* Use item.randomNumber or other properties for additional contact information */}
             </View>
         </TouchableOpacity>
@@ -124,17 +124,11 @@ const Contact = ({ navigation }) => {
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} >
             <PageContainer>
                 <View style={{ flex: 1 }}>
                     <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginHorizontal: 22,
-                            marginTop: 35,
-                        }}
+                        style={styles.header}
                     >
                         <Text style={{ ...FONTS.h4 }}>Contacts</Text>
                         <TouchableOpacity onPress={() => navigation.navigate("AddContact")}>
@@ -142,25 +136,12 @@ const Contact = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                     <View
-                        style={{
-                            marginHorizontal: 22,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            backgroundColor: COLORS.secondaryWhite,
-                            height: 48,
-                            marginVertical: 22,
-                            paddingHorizontal: 12,
-                            borderRadius: 20,
-                        }}
+                        style={styles.searchContainer}
                     >
                         <Ionicons name="ios-search-outline" size={24} color={COLORS.black} />
 
                         <TextInput
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                marginHorizontal: 12,
-                            }}
+                            style={styles.search}
                             placeholder="Search Contact..."
                             value={search}
                             onChangeText={handleSearch}
@@ -168,7 +149,7 @@ const Contact = ({ navigation }) => {
                     </View>
 
                     {loading ? (
-                        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 50 }}>
+                        <View style={styles.message}>
                             <Text style={{ ...FONTS.h4, color: COLORS.secondaryGray }}>
                                 Please add the Contacts
                             </Text>
@@ -187,5 +168,39 @@ const Contact = ({ navigation }) => {
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginHorizontal: 22,
+        marginTop: 15,
+    },
+    searchContainer: {
+        marginHorizontal: 22,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.secondaryWhite,
+        height: 48,
+        marginVertical: 22,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+    },
+    search: {
+        width: '100%',
+        height: '100%',
+        marginHorizontal: 12,
+    },
+    message: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 50
+    }
+
+})
 
 export default Contact;

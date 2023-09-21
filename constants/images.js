@@ -10,7 +10,7 @@ const user5 = require('../assets/images/user5.jpg')
 const user6 = require('../assets/images/user6.jpg')
 const user7 = require('../assets/images/user7.jpg')
 const user8 = require('../assets/images/user8.jpg')
-
+const whatsapp = require ('../assets/images/whatsapp.jpg')
 export default {
     illustration,
     cat,
@@ -24,4 +24,5 @@ export default {
     user7,
     user8,
     usFlag,
+    whatsapp
 }

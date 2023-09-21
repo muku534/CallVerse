@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal, TextInput, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TextInput, Image, Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 // import ImagePicker from 'react-native-image-picker';
@@ -79,7 +79,7 @@ const AddProfile = ({ navigation, route }) => {
 
         try {
             // Make API request to store the profile data in MongoDB
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/profile`, {
+            const response = await axios.post(`http://192.168.42.196:5000/profile`, {
                 randomNumber: phoneNumber,
                 name: name,
                 email: email,
@@ -91,6 +91,11 @@ const AddProfile = ({ navigation, route }) => {
             const { message, profile } = response.data;
             console.log(message);
             // console.log('Stored profile:');
+
+            // Save the profile data in AsyncStorage
+            // await AsyncStorage.setItem('userProfile', JSON.stringify(profile));
+
+
             Alert.alert(message,);
 
             // Navigate to the next screen (e.g., BottomTabNavigation)
@@ -107,7 +112,7 @@ const AddProfile = ({ navigation, route }) => {
             <PageContainer>
                 {/* <PageTitle title="Profile" onPress={() => navigation.navigate('Contact')} /> */}
                 <ScrollView>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
+                    <View style={styles.container}>
                         <Text style={{
                             ...(SIZES.width <= 360 ?
                                 { ...FONTS.h2 }
@@ -194,147 +199,48 @@ const AddProfile = ({ navigation, route }) => {
                             </TouchableOpacity>
                         </Modal>
 
-                        <View style={{ width: '100%', paddingHorizontal: 22, paddingVertical: 0 }}>
+                        <View style={styles.formContainer}>
 
 
-                            <Text style={{
-                                fontSize: 16,
-                                fontWeight: '400',
-                                marginVertical: 8
-                            }}>Phone Number</Text>
+                            <Text style={styles.lable}>Phone Number</Text>
 
-                            <View style={{
-                                width: "100%",
-                                height: 48,
-                                // borderColor: COLORS.black,
-                                // borderWidth: 1,
-                                // borderRadius: 8,
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}>
-                                <Text style={{
-                                    width: "100%",
-                                    height: 54,
-                                    fontSize: 14,
-                                    backgroundColor: COLORS.secondaryWhite,
-                                    paddingLeft: 22,
-
-                                    borderRadius: SIZES.padding
-                                    ,
-                                    paddingTop: 15,
-                                    paddingLeft: SIZES.padding
-                                    ,
-                                    color: '#111',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}>{phoneNumber}</Text>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.TextInput}>{phoneNumber}</Text>
                             </View>
 
 
-                            <Text style={{
-                                fontSize: 16,
-                                fontWeight: '400',
-                                marginTop: 22,
-                            }}>Display name</Text>
+                            <Text style={styles.lable}>Display name</Text>
 
-                            <View style={{
-                                width: "100%",
-                                height: 48,
-                                marginVertical: 12,
-                                // borderColor: COLORS.black,
-                                // borderWidth: 1,
-                                // borderRadius: 8,
-                                alignItems: "center",
-                                justifyContent: "center",
-
-                            }}>
+                            <View style={styles.inputContainer}>
                                 <TextInput
                                     placeholder='example@ Mukesh534'
                                     placeholderTextColor={COLORS.secondaryGray}
                                     keyboardType='default'
-                                    style={{
-                                        width: "100%",
-                                        height: 54,
-                                        fontSize: 14,
-                                        backgroundColor: COLORS.secondaryWhite,
-                                        paddingLeft: 22,
-                                        borderRadius: SIZES.padding
-                                        ,
-                                        paddingLeft: SIZES.padding
-                                        ,
-                                        color: '#111'
-                                    }}
+                                    style={styles.textInput}
                                     onChangeText={(text) => setName(text)}
                                 />
                             </View>
 
-                            <Text style={{
-                                fontSize: 16,
-                                fontWeight: '400',
-                                // marginTop: 22,
-                            }}>Bio</Text>
+                            <Text style={styles.lable}>Bio</Text>
 
-                            <View style={{
-                                width: "100%",
-                                height: 48,
-                                marginVertical: 12,
-                                // borderColor: COLORS.black,
-                                // borderWidth: 1,
-                                // borderRadius: 8,
-                                alignItems: "center",
-                                justifyContent: "center",
-
-                            }}>
+                            <View style={styles.inputContainer}>
                                 <TextInput
                                     placeholder='Hi there! My name is Mukesh'
                                     placeholderTextColor={COLORS.secondaryGray}
                                     keyboardType='default'
-                                    style={{
-                                        width: "100%",
-                                        height: 54,
-                                        fontSize: 14,
-                                        backgroundColor: COLORS.secondaryWhite,
-                                        paddingLeft: 22,
-                                        borderRadius: SIZES.padding
-                                        ,
-                                        paddingLeft: SIZES.padding
-                                        ,
-                                        color: '#111'
-                                    }}
+                                    style={styles.textInput}
                                     onChangeText={(text) => setBio(text)}
                                 />
                             </View>
 
-                            <Text style={{
-                                fontSize: 16,
-                                fontWeight: '400',
-                                // marginTop: 22,
-                            }}>Email </Text>
+                            <Text style={styles.lable}>Email </Text>
 
-                            <View style={{
-                                width: "100%",
-                                height: 48,
-                                marginVertical: 12,
-                                alignItems: "center",
-                                justifyContent: "center",
-
-                            }}>
+                            <View style={styles.inputContainer}>
                                 <TextInput
                                     placeholder='Hi there! My name is Mukesh'
                                     placeholderTextColor={COLORS.secondaryGray}
                                     keyboardType='email-address'
-                                    style={{
-                                        width: "100%",
-                                        height: 54,
-                                        fontSize: 14,
-                                        backgroundColor: COLORS.secondaryWhite,
-                                        paddingLeft: 22,
-                                        borderRadius: SIZES.padding
-                                        ,
-                                        paddingLeft: SIZES.padding
-                                        ,
-                                        color: '#111'
-                                    }}
+                                    style={styles.textInput}
                                     onChangeText={(text) => setEmail(text)}
                                 />
                             </View>
@@ -357,5 +263,58 @@ const AddProfile = ({ navigation, route }) => {
         </SafeAreaView>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center'
+    },
+
+    formContainer: {
+        width: '100%',
+        paddingHorizontal: 22,
+        paddingVertical: 0
+    },
+    lable: {
+        fontSize: 16,
+        fontWeight: '400',
+        marginVertical: 8
+    },
+    inputContainer: {
+        width: "100%",
+        height: 48,
+        // borderColor: COLORS.black,
+        // borderWidth: 1,
+        // borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    TextInput: {
+        width: "100%",
+        height: 54,
+        fontSize: 14,
+        backgroundColor: COLORS.secondaryWhite,
+        paddingLeft: 22,
+        borderRadius: SIZES.padding,
+        paddingTop: 15,
+        paddingLeft: SIZES.padding,
+        color: '#111',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    textInput: {
+        width: "100%",
+        height: 54,
+        fontSize: 14,
+        backgroundColor: COLORS.secondaryWhite,
+        paddingLeft: 22,
+        borderRadius: SIZES.padding
+        ,
+        paddingLeft: SIZES.padding
+        ,
+        color: '#111'
+    }
+})
+
 
 export default AddProfile
