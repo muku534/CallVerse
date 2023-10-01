@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -9,21 +9,22 @@ import {
 } from 'react-native';
 import { COLORS, FONTS } from '../../../constants';
 import { StatusBar } from 'expo-status-bar';
-import { Feather, FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Bubble, GiftedChat, Send } from 'react-native-gifted-chat';
+import { Feather, Entypo, FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Bubble, GiftedChat, Send, Actions, InputToolbar, Composer } from 'react-native-gifted-chat';
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserData } from '../auth/Storage';
 import * as ImagePicker from 'expo-image-picker';
 
 const PersonalChat = ({ route, navigation }) => {
+    const { userName, imageUrl, recipientId } = route.params;
+
     const [userData, setUserData] = useState(null);
-    const { userName, userImg, recipientId } = route.params;
     const [messages, setMessages] = useState([]);
-    const [chatRoom, setChatRoom] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [selectedGif, setSelectedGif] = useState(null);
-    const socket = io('http://192.168.42.54:5000');
+    const [chatRoom, setChatRoom] = useState(null);
+
+    const socket = useMemo(() => io('http://192.168.42.109:5000'), []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,10 +34,13 @@ const PersonalChat = ({ route, navigation }) => {
                     const storedMessages = await AsyncStorage.getItem(`chatMessages_${chatRoom}`);
                     const existingMessages = storedMessages ? JSON.parse(storedMessages) : [];
 
-                    // Reverse the order of existing messages to display older messages first
-                    const reversedMessages = existingMessages.reverse();
+                    // Sort the messages by timestamp in ascending order (oldest to newest)
+                    const sortedMessages = existingMessages.sort((a, b) => a.createdAt - b.createdAt);
 
-                    // Update the state with existing messages
+                    // Reverse the order to display them in descending order (newest to oldest)
+                    const reversedMessages = sortedMessages.reverse();
+
+                    // Update the state with sorted messages
                     setMessages(reversedMessages);
 
                     // Emit a 'getMessages' event to request existing messages from the server
@@ -48,7 +52,8 @@ const PersonalChat = ({ route, navigation }) => {
         };
 
         fetchData();
-    }, [userData, chatRoom, recipientId]);
+    }, [userData, chatRoom, recipientId, socket]);
+
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -68,16 +73,18 @@ const PersonalChat = ({ route, navigation }) => {
             setChatRoom(room);
             socket.emit('joinRoom', { sender: userData._id, recipient: recipientId });
         }
-    }, [userData, recipientId]);
+
+    }, [userData, recipientId, socket]);
 
     useEffect(() => {
         if (userData) {
             socket.on('message', (newMessage) => {
                 if (newMessage.room === chatRoom) {
+
                     setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessage));
 
-                    // Store the updated messages in local storage
-                    storeChatMessages(chatRoom, messages.concat(newMessage));
+                    // // Store the updated messages in local storage
+                    // storeChatMessages(chatRoom, messages.concat(newMessage));
                 }
             });
         }
@@ -96,13 +103,9 @@ const PersonalChat = ({ route, navigation }) => {
 
             const result = await ImagePicker.launchImageLibraryAsync(options);
 
-            if (result.canceled) {
-                console.log('User cancelled image picker');
-            } else if (result.error) {
-                console.error('ImagePicker Error: ', result.error);
-            } else if (result.assets && result.assets.length > 0) {
+            if (!result.canceled && !result.error && result.assets && result.assets.length > 0) {
                 const selectedAsset = result.assets[0];
-                const { uri, } = selectedAsset;
+                const { uri } = selectedAsset;
 
                 // Convert the selected image to base64
                 const base64Image = await fetch(uri)
@@ -115,7 +118,6 @@ const PersonalChat = ({ route, navigation }) => {
                     }));
 
                 setSelectedImage(base64Image); // Set the selected image URI
-                console.log("Received File URI:", base64Image)
                 // Send the selected image to the server
                 socket.emit('send', {
                     sender: userData._id,
@@ -128,39 +130,48 @@ const PersonalChat = ({ route, navigation }) => {
         }
     };
 
-
     const onSend = useCallback(async (newMessages = []) => {
         if (userData) {
             const room = chatRoom;
 
+            const currentUser = {
+                _id: userData._id,
+            };
+
+            const newMessage = {
+                ...newMessages[0],
+                user: currentUser,
+            };
+
+            // // Optimistically append the new message to the state
+            // setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessage));
+            setMessages((previousMessages) => [...previousMessages, newMessage]);
 
             // Check if the message contains an image URL (for image messages)
             const isImageMessage = newMessages[0].image !== undefined;
 
+            if (isImageMessage) {
+                // If it's an image message, set the `image` property
+                newMessage.image = selectedImage;
+
+                // Reset the selected image after sending
+                setSelectedImage(null);
+            }
+
+            // Send the new message to the server
             socket.emit('send', {
                 sender: userData._id,
                 recipient: recipientId,
-                message: isImageMessage ? '' : newMessages[0].text, // Empty message for images
+                message: isImageMessage ? '' : newMessages[0].text,
                 room,
-                image: isImageMessage ? newMessages[0].image : null, // Image URL for image messages
-
+                image: isImageMessage ? newMessages[0].image : null,
             });
+
+
+
+            // Store the updated messages in AsyncStorage
+            await storeChatMessages(chatRoom, [...messages, newMessage]);
         }
-
-        const currentUser = {
-            _id: userData ? userData._id : 1,
-        };
-
-        const newMessage = {
-            ...newMessages[0],
-            user: currentUser,
-        };
-
-        // Update the state with the new message
-        setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessage));
-
-        // Store the updated messages in AsyncStorage
-        await storeChatMessages(chatRoom, [...messages, newMessage]);
     }, [userData, recipientId, chatRoom, messages, socket, selectedImage]);
 
     const clearChatRoomAndMessages = async () => {
@@ -186,62 +197,138 @@ const PersonalChat = ({ route, navigation }) => {
                 <View style={{ borderRadius: 30 }}>
                     <View
                         style={{
-                            height: 36,
+                            height: 42,
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: 43,
+                            width: 45,
                             borderRadius: 30,
                             borderWidth: 1,
                             borderColor: COLORS.gray,
-                            backgroundColor: COLORS.primary,
-                            marginRight: 5,
-                            marginBottom: 5,
+                            backgroundColor: COLORS.darkGreeen,
+                            marginRight: 10,
+                            // marginBottom: 5,
                         }}
                     >
-                        <FontAwesome name="send" size={15} color={COLORS.white} />
+                        <FontAwesome name="send" size={18} color={COLORS.white} />
                     </View>
                 </View>
             </Send>
         </TouchableOpacity>
     );
 
+
+    const renderInputToolbar = (props) => {
+        return (
+            <InputToolbar
+                {...props}
+                containerStyle={{
+                    borderTopWidth: 0,
+                    backgroundColor: 'transparent',
+                    marginBottom: 5,
+                }}
+                primaryStyle={{ justifyContent: 'center' }}
+            >
+                <Composer
+                    {...props}
+                    textInputStyle={{
+                        backgroundColor: COLORS.black,
+                        color: COLORS.secondaryBlack,
+                        borderRadius: 22,
+                        borderWidth: 1,
+                        borderColor: COLORS.gray,
+                        marginRight: 6,
+                        paddingHorizontal: 12,
+                    }}
+                />
+                <Send {...props} />
+                <renderActions {...props} />
+            </InputToolbar>
+        );
+    };
+
+    const CustomActions = (props) => {
+        return (
+            <FontAwesome name="camera" size={24} color="black" />
+        );
+    };
+
+    const renderActions = (props) => (
+        <Actions
+            {...props}
+            options={{
+                'Choose From Library': () => pickImage(),
+            }}
+            icon={() => <CustomActions />}
+        />
+    );
+
+
+    // Inside the renderMessageImage function:
     const renderMessageImage = (props) => {
         const { currentMessage } = props;
 
-        if (currentMessage && currentMessage.image) {
-            // Check if the message contains an image URL
-            const image = currentMessage.image;
-
-            // Render the image if it exists
-            if (image.url) {
-                return (
-                    <Image
-                        source={{ uri: image.url }}
-                        style={{ width: 200, height: 200 }}
-                        resizeMode="cover"
-                    />
-                );
-            }
+        if (currentMessage.image) {
+            console.log('Current Message Image URI:', currentMessage.image); // Debugging
+            return (
+                <Image
+                    {...props}
+                    resizeMode="contain"
+                    style={{ width: 200, height: 150, borderRadius: 8 }}
+                    source={{ uri: `data:image/jpeg;base64,${currentMessage.image}` }} // Render base64 image
+                />
+            );
+        } else if (selectedImage) {
+            console.log('Selected Image URI:', selectedImage); // Debugging
+            // Display the locally selected base64 image
+            return (
+                <Image
+                    {...props}
+                    resizeMode="contain"
+                    style={{ width: 200, height: 150, borderRadius: 8 }}
+                    source={{ uri: selectedImage }} // Render base64 image
+                />
+            );
         }
 
-        return null; // Return null if there is no image
     };
 
 
+    const renderBubble = (props) => {
+        const { currentMessage } = props;
+        // Add debugging logs if needed
+        console.log('Rendering bubble for currentMessage:', currentMessage.image);
 
-    const renderBubble = (props) => (
-        <Bubble
-            {...props}
-            wrapperStyle={{
-                right: {
-                    backgroundColor: COLORS.secondary,
-                },
-            }}
-            textStyle={{
-                color: COLORS.white,
-            }}
-        />
-    );
+        const bubbleStyle = {
+            right: {
+                backgroundColor: COLORS.green,
+            },
+        };
+
+        const textStyle = {
+            right: {
+                color: COLORS.black,
+
+            },
+        };
+
+        return (
+            <Bubble
+                {...props}
+                wrapperStyle={bubbleStyle}
+                textStyle={textStyle}
+            >
+                {currentMessage.image ? ( // Check if the message contains an image
+                    <Image
+                        source={{ uri: currentMessage.image }}
+                        style={{ width: 200, height: 200 }} // Adjust the size as needed
+                    />
+                ) : null}
+                {renderMessageImage({ currentMessage })}
+
+            </Bubble>
+        );
+    };
+
 
     const storeChatMessages = async (room, messagesToStore) => {
         try {
@@ -258,18 +345,18 @@ const PersonalChat = ({ route, navigation }) => {
 
     return (
         <ImageBackground
-            source={require('../../../assets/images/ChatBg.jpg')}
+            source={require('../../../assets/images/wallpaper.webp')}
             style={{ flex: 1 }} resizeMode='cover'
         >
             <SafeAreaView style={{ flex: 1, color: COLORS.secondaryWhite }}>
-                <StatusBar style="light" backgroundColor={COLORS.secondaryBlack} />
+                <StatusBar style="light" backgroundColor={COLORS.darkGreeen} />
                 <View style={{ flex: 1 }}>
                     <View
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             paddingHorizontal: 22,
-                            backgroundColor: COLORS.secondaryBlack,
+                            backgroundColor: COLORS.darkGreeen,
                             marginVertical: 22,
                             height: 60,
                         }}
@@ -281,12 +368,12 @@ const PersonalChat = ({ route, navigation }) => {
                             >
                                 <MaterialIcons
                                     name="keyboard-arrow-left"
-                                    size={28}
+                                    size={32}
                                     style={{ color: COLORS.secondaryWhite }}
                                 />
                             </TouchableOpacity>
                             <Image
-                                source={userImg}
+                                source={{ uri: imageUrl }}
                                 resizeMode="contain"
                                 style={{
                                     height: 35,
@@ -298,24 +385,9 @@ const PersonalChat = ({ route, navigation }) => {
                             <Text style={{ ...FONTS.h4, marginLeft: 8, color: COLORS.secondaryWhite }}>{userName}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('VoiceCall')} style={{ margin: 8 }}>
-                                <Ionicons
-                                    name="call-outline"
-                                    size={24}
-                                    color={COLORS.black}
-                                    style={{ color: COLORS.secondaryWhite }}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => console.log('menu')} style={{ margin: 8 }}>
-                                <Feather
-                                    name="video"
-                                    size={24}
-                                    color={COLORS.black}
-                                    style={{ color: COLORS.secondaryWhite }}
-                                />
-                            </TouchableOpacity>
+
                             <TouchableOpacity onPress={clearChatRoomAndMessages}>
-                                <MaterialIcons name="delete" size={24} style={{ color: COLORS.secondaryWhite }} />
+                                <Entypo name="dots-three-vertical" size={18} style={{ color: COLORS.secondaryWhite }} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -328,6 +400,11 @@ const PersonalChat = ({ route, navigation }) => {
                         renderBubble={renderBubble}
                         alwaysShowSend
                         renderSend={renderSend}
+                        renderInputToolbar={renderInputToolbar}
+                        renderActions={renderActions}
+                        renderMessageImage={renderMessageImage}
+                        renderUsernameOnMessage={true}
+                        imageProps={{ resizeMode: 'contain' }}
                         scrollToBottom
                         textInputStyle={{
                             borderRadius: 22,
@@ -335,18 +412,13 @@ const PersonalChat = ({ route, navigation }) => {
                             borderColor: COLORS.gray,
                             marginRight: 6,
                             paddingHorizontal: 12,
-                            backgroundColor: COLORS.black,
-                            color: COLORS.secondaryWhite,
+                            backgroundColor: COLORS.white,
+                            color: COLORS.black,
                         }}
-                        renderMessageImage={renderMessageImage} // Update this line
+                        timeTextStyle={{ left: { color: COLORS.secondaryBlack }, right: { color: COLORS.secondaryBlack } }}
                         style={{ backgroundColor: COLORS.secondaryBlack }}
                     />
-                    <TouchableOpacity onPress={pickImage}>
-                        <FontAwesome name="paperclip" size={40} style={{ color: COLORS.secondaryWhite }} />
-                    </TouchableOpacity>
-                    {selectedImage && (
-                        <Image source={{ uri: selectedImage }} style={{ width: 200, height: 200 }} />
-                    )}
+                    {selectedImage && <Image source={{ uri: selectedImage }} style={{ width: 100, height: 100 }} />}
                 </View>
             </SafeAreaView>
         </ImageBackground>
