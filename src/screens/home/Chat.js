@@ -41,7 +41,7 @@ const Chat = ({ navigation }) => {
             }
 
             try {
-                const response = await axios.get(`http://192.168.42.54:5000/AllChatRooms`, {
+                const response = await axios.get(`http://192.168.42.252:5000/AllChatRooms`, {
                     params: {
                         userId: userData._id
                     }
@@ -68,17 +68,17 @@ const Chat = ({ navigation }) => {
 
     const handleSearch = (text) => {
         setSearch(text);
-        const filteredData = allChatUsers.filter((users) =>
+        const filteredUsers = allChatUsers.filter((users) =>
             users.userName.toLowerCase().includes(text.toLowerCase())
         );
-        setFilteredUsers(filteredData);
+        setFilteredUsers(filteredUsers);
     };
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
             onPress={() =>
                 navigation.navigate('PersonalChat', {
-                    userName: item.name, userImg: images.user4, recipientId: item._id,
+                    userName: item.name, imageUrl: item.imageUrl, recipientId: item._id,
                 })
             }
             style={{
@@ -92,7 +92,7 @@ const Chat = ({ navigation }) => {
             }}
         >
             <Image
-                source={images.user4}
+                source={{ uri: item.imageUrl }}
                 resizeMode="contain"
                 style={{
                     height: 42,
@@ -169,9 +169,19 @@ const Chat = ({ navigation }) => {
                     </View>
                     {loading ? (
                         <ActivityIndicator size="large" color={COLORS.primary} />
+                    ) : filteredUsers.length === 0 ? (
+                        <View style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginVertical: 50
+                        }}>
+                            <Text style={{ ...FONTS.h4, color: COLORS.secondaryGray }}>
+                                you dont have any chats
+                            </Text>
+                        </View>
                     ) : (
                         <FlatList
-                            data={allChatUsers}
+                            data={filteredUsers}
                             renderItem={renderItem}
                             keyExtractor={(item) => item._id} // Assuming _id is a unique identifier
                         />

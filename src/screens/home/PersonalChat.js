@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-    View,
-    Text,
-    SafeAreaView,
-    TouchableOpacity,
-    Image,
-    ImageBackground,
-} from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, Image, ImageBackground, } from 'react-native';
 import { COLORS, FONTS } from '../../../constants';
 import { StatusBar } from 'expo-status-bar';
 import { Feather, Entypo, FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -15,6 +8,7 @@ import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserData } from '../auth/Storage';
 import * as ImagePicker from 'expo-image-picker';
+import messaging from '@react-native-firebase/messaging';
 
 const PersonalChat = ({ route, navigation }) => {
     const { userName, imageUrl, recipientId } = route.params;
@@ -24,7 +18,7 @@ const PersonalChat = ({ route, navigation }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [chatRoom, setChatRoom] = useState(null);
 
-    const socket = useMemo(() => io('http://192.168.42.109:5000'), []);
+    const socket = useMemo(() => io('http://192.168.42.252:5000'), []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -167,12 +161,56 @@ const PersonalChat = ({ route, navigation }) => {
                 image: isImageMessage ? newMessages[0].image : null,
             });
 
-
+            // Send a push notification to the recipient
+            sendPushNotificationToRecipient(newMessages[0].text, recipientId);
 
             // Store the updated messages in AsyncStorage
             await storeChatMessages(chatRoom, [...messages, newMessage]);
         }
     }, [userData, recipientId, chatRoom, messages, socket, selectedImage]);
+
+    const sendPushNotificationToRecipient = async (messageText, recipientId) => {
+        try {
+            // Retrieve the recipient's FCM token from the server
+            const response = await fetch('http://192.168.42.252:5000/getFcmToken', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ recipientId }), // Send recipientId to the server to fetch the FCM token
+            });
+
+            if (!response.ok) {
+                console.error('Failed to fetch recipient FCM token');
+                return;
+            }
+
+            const recipientFcmToken = await response.json();
+
+            if (recipientFcmToken) {
+                const messagePayload = {
+                    notification: {
+                        title: 'New Message',
+                        body: `You have received a new message from ${userData.userName}`,
+                    },
+                    data: {
+                        sender: userData._id,
+                        message: messageText, // You can include any additional data you want to send with the notification
+                    },
+                    token: recipientFcmToken,
+                };
+
+                // Send the push notification
+                const notificationResponse = await admin.messaging().send(messagePayload);
+                console.log('Notification sent successfully:', notificationResponse);
+            } else {
+                console.log('Recipient FCM token not found.');
+            }
+        } catch (error) {
+            console.error('Error sending push notification:', error);
+        }
+    };
+
 
     const clearChatRoomAndMessages = async () => {
         try {

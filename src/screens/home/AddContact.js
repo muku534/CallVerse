@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 // import ImagePicker from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { useFocusEffect } from '@react-navigation/native';
 import PageContainer from '../../components/PageContainer';
 import PageTitle from '../../components/PageTitle';
 import { COLORS, FONTS, SIZES, } from '../../../constants';
@@ -17,6 +18,7 @@ const AddContact = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [userData, setUserData] = useState(null);
+    const [shouldRefresh, setShouldRefresh] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -37,15 +39,26 @@ const AddContact = ({ navigation }) => {
         try {
 
             // User exists, proceed to add the contact
-            const Response = await axios.post(`http://192.168.42.196:5000/AddContacts`, {
+            const Response = await axios.post(`http://192.168.42.252:5000/AddContacts`, {
                 randomNumber: phoneNumber,
                 userRandomNumber: userData.randomNumber,
                 contactName
             });
 
             console.log(Response.data)
+            // Clear input fields after successful contact addition
+            setContactName('');
+            setPhoneNumber('');
+
+            // Trigger a refresh of the Contact screen
+            setShouldRefresh(true);
+
+
+            // Navigate to the BottomTabNavigation screen
+            navigation.navigate('BottomTabNavigation');
         } catch (error) {
             console.log(error.message)
+            setIsLoading(false)
         }
     }
 

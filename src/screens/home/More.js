@@ -15,7 +15,7 @@ const More = ({ navigation }) => {
             const user = await getUserData();
             if (user) {
                 setUserData(user);
-                console.log("This is the userData:",)
+                console.log("This is the userData:", user)
             }
         }
 
@@ -48,7 +48,7 @@ const More = ({ navigation }) => {
                     <View style={styles.userInformation}>
 
                         <View style={styles.imageContainer}>
-                            <Image source={images.user4} style={styles.userImage} />
+                            <Image source={{ uri: userData?.imageUrl }} style={styles.userImage} />
                         </View>
                         <View style={styles.userNameContainer}>
                             <Text style={styles.nameText}>
@@ -134,7 +134,7 @@ const More = ({ navigation }) => {
                             </TouchableOpacity>
                         </Modal>
 
-                        <TouchableOpacity onPress={() => {
+                        {/* <TouchableOpacity onPress={() => {
                             console.log("presser")
                         }}
                             style={styles.TouchableOpacity}
@@ -227,7 +227,7 @@ const More = ({ navigation }) => {
                                 name='keyboard-arrow-right'
                                 size={24}
                                 color={COLORS.black} />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
 
                         <TouchableOpacity onPress={() => navigation.navigate('Welcome')}
                             style={styles.logOutContainer}
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginHorizontal: 22,
+        paddingHorizontal: 22,
         marginVertical: 22,
         marginTop: 15,
     },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginHorizontal: 22
+        marginHorizontal: 28
     },
     imageContainer: {
         height: 40,

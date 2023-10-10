@@ -29,7 +29,7 @@ const Welcome = ({ navigation }) => {
     const handleGenerateNumber = async () => {
         if (!generatedNumber) {
             try {
-                const response = await axios.post(`${process.env.REACT_APP_API_URL}/GenerateNumber`);
+                const response = await axios.post(`http://192.168.42.252:5000/GenerateNumber`);
                 const newNumber = response.data.randomNumber;
 
                 // Store the number in AsyncStorage on the user's device

@@ -8,11 +8,13 @@ import {
     FlatList,
     StyleSheet,
     Image,
+    ActivityIndicator
 } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, images } from '../../../constants';
 import PageContainer from '../../components/PageContainer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import axios from "axios"
 import { getUserData } from '../auth/Storage'
 
@@ -22,6 +24,7 @@ const Contact = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filteredContacts, setFilteredContacts] = useState([]);
+    const [shouldRefresh, setShouldRefresh] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -55,7 +58,7 @@ const Contact = ({ navigation }) => {
                 return; // Wait for userData to be available
             }
             try {
-                const response = await axios.get(`http://192.168.42.54:5000/contacts`, {
+                const response = await axios.get(`http://192.168.42.252:5000/contacts`, {
                     params: {
                         userRandomNumber: userData.randomNumber
                     }
@@ -90,10 +93,19 @@ const Contact = ({ navigation }) => {
         setFilteredContacts(filteredData);
     };
 
+    useFocusEffect(
+        React.useCallback(() => {
+            if (shouldRefresh) {
+                // Fetch contacts again or perform any actions needed to refresh the screen
+                setContacts(); // You may need to define or call your fetchContacts function here
+                setShouldRefresh(false); // Reset shouldRefresh
+            }
+        }, [shouldRefresh])
+    );
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
-            onPress={() => navigation.navigate('PersonalChat', { userName: item.contactName, userImg: images.user4, recipientId: item.ContactUserId, })}
+            onPress={() => navigation.navigate('PersonalChat', { userName: item.contactName, imageUrl: item.imageUrl, recipientId: item.ContactUserId, })}
             style={{
                 width: '100%',
                 flexDirection: 'row',
@@ -107,7 +119,7 @@ const Contact = ({ navigation }) => {
             {/* Render online status indicator if needed */}
             {/* Use item.randomNumber to uniquely identify contacts if needed */}
             <Image
-                source={images.user4} // Assuming you have a UserImg property in your contact data
+                source={{ uri: item.imageUrl }}
                 resizeMode="contain"
                 style={{
                     height: 42,
@@ -149,6 +161,10 @@ const Contact = ({ navigation }) => {
                     </View>
 
                     {loading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={COLORS.primary} />
+                        </View>
+                    ) : filteredContacts.length === 0 ? (
                         <View style={styles.message}>
                             <Text style={{ ...FONTS.h4, color: COLORS.secondaryGray }}>
                                 Please add the Contacts
@@ -161,8 +177,6 @@ const Contact = ({ navigation }) => {
                             keyExtractor={(item) => item.randomNumber.toString()} // Use a valid identifier
                         />
                     )}
-
-
                 </View>
             </PageContainer>
         </SafeAreaView>
@@ -175,9 +189,10 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
+        height: 'auto',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginHorizontal: 22,
+        paddingHorizontal: 22,
         marginTop: 15,
     },
     searchContainer: {
